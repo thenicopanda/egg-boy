@@ -1,0 +1,14 @@
+{
+  "botPrefix": "e!",
+  "botName": "Egg Bot",
+  "modRole" : 903020754898137108,
+  "token" : "Your Secret Token Here",
+  "displayGame" : "Your Mom",
+  "modLogChannel" : 913293571338149898,
+  "meritLogChannel" : 915735156290093136,
+  "cogs" : [
+    "cogs.main",
+    "cogs.fun",
+    "cogs.egg"
+  ]
+}
