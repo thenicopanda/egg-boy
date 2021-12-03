@@ -202,6 +202,8 @@ def human_format(number):
     return '%.3f%s' % (number / k**magnitude, units[magnitude])
 
 def calculateEB(soulEggs: str, prophecyEggs: Decimal, prophecyBonus: Decimal, soulFood: Decimal, human: bool):
+    if soulEggs == "0":
+        return "E1"
     if soulEggs.endswith("k"):
         soulEggs = (soulEggs[:-1]) 
         soulEggs = soulEggs * 1000    
