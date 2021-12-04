@@ -1,6 +1,7 @@
 """
 ############################################################################################
  Commands
+ * ecalc    - Calculate a hypothetical EB based on input.
  * update   - Update a user's stats in the users.json file (Update Perm Required)
 ############################################################################################
 """
@@ -29,7 +30,9 @@ class Egg(commands.Cog, name="Egg Server Functions"):
         """Calculate EB based on values you enter."""
         results = t.calculateEB(souleggs, prophecyeggs, prophecybonus, soulfood, humanreadable)
         if results == False:
-            await ctx.respond("Something went wrong :/")
+            await ctx.respond(f"Something went wrong when calculating...```Soul Eggs: {souleggs}\nProphecy Eggs: {prophecyeggs}\nProphecy Bonus: {prophecybonus}\nSoul Food: {soulfood}```")
+        elif results == "E1":
+            await ctx.respond("Must enter 1 or more Soul Eggs.")
         else:
             messageToSend = f"Results:```Soul Eggs: {souleggs}\nProphecy Eggs: {prophecyeggs}\nProphecy Bonus: {prophecybonus}\nSoul Food: {soulfood}\n\nEarnings Bonus: {results}%```"
             await ctx.respond(messageToSend)
