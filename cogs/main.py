@@ -7,6 +7,8 @@
  * say   - Makes the bot say something in a channel of your choosing (Mod Role Required)
  * pchannel - Create a private channel for up to 5 users             (Mod Role Required)
  * addmerit - Add a merit to a user of your choice
+ * merits - get a list of your merits
+ * cleardms - clear the bots dms to you
 ####################################################
 """
 
@@ -142,5 +144,15 @@ class Main(commands.Cog, name="Core Functions"):
             await ctx.respond(meritString)
         else:
             await ctx.respond("You do not have any merits quite yet.")
+
+    @commands.slash_command(name="cleardms", guild_ids=[901328556603367446])
+    async def cleardms(self, ctx):
+        """Clear up to the past 100 dms I've sent you."""
+        dmchannel = await ctx.author.create_dm()
+        async for message in dmchannel.history(limit=100):
+            if message.author == self.bot.user:
+                await message.delete()
+        await ctx.respond("Done.", ephemeral=True)
+
 def setup(bot):
     bot.add_cog(Main(bot))
