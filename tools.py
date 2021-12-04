@@ -59,11 +59,16 @@ def addMerits(userid, message):
             json.dump(data, meritJson, indent = 2)
             meritJson.truncate()
 
-            # Make Egg Boy add the user to the merit file
+
+def is_prime(n):
+    return n > 1 and all(n % i for i in range(2, int(n ** 0.5) + 1))
 
 
-
-
+"""
+####################################################
+From here down all functions are needed in egg.py
+####################################################
+"""
 
 def EggFindUser(userid):
     """Load A User From The users.json file"""
@@ -244,6 +249,8 @@ def calculateEB(soulEggs: str, prophecyEggs: Decimal, prophecyBonus: Decimal, so
         return EB
     except:
         return False
+
+
 
 
 
