@@ -1,0 +1,42 @@
+---
+# This is the 'prefix' the bot will use.
+# Seeing as this bot only uses slash commands though.. It is never used
+botPrefix: e!
+
+# This is the name of the Bot to be displayed in /info
+botName: Egg Boy
+
+# This is the role ID for whoever is supposed to have moderation perms
+modRole: 903020754898137108
+
+# This is the super secret token to actually run the bot.
+token: token goes here
+
+# This is what the bot will be shown as playing.
+displayGame: Cracking Piggys
+
+#################################################################################
+
+# These next few are for different channels.
+# Moderation logs (Use false to disable)
+modLogChannel: 913293571338149898
+
+# Merit logs
+meritLogChannel: 915735156290093136
+
+# Counting Channel (Use false to disable)
+countingChannel: 916189263756943390
+
+# Category for private channels to be put under
+privateChannelCategory: 903482862811111454
+
+##################################################################################
+
+# Which Cogs should be loaded?
+
+cogs:
+- main
+- egg
+- fun
+- mod
+- merit
