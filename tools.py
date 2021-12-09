@@ -226,46 +226,54 @@ def human_format(number):
     magnitude = int(floor(log(number, k)))
     return '%.3f%s' % (number / k**magnitude, units[magnitude])
 
-def calculateEB(soulEggs: str, prophecyEggs: Decimal, prophecyBonus: Decimal, soulFood: Decimal, human: bool):
-    if soulEggs == "0":
+
+def formatLargeNumber(largeNumber: str):
+    if largeNumber == "0":
         return "E1"
-    if soulEggs.endswith("k"):
-        soulEggs = (soulEggs[:-1]) 
-        soulEggs = soulEggs * 1000    
-    elif soulEggs.endswith("m"):
-        soulEggs = Decimal(soulEggs[:-1]) 
-        soulEggs = soulEggs * 1000000
-    elif soulEggs.endswith("b"):
-        soulEggs = Decimal(soulEggs[:-1]) 
-        soulEggs = soulEggs * 1000000000
-    elif soulEggs.endswith('t'):
-        soulEggs = Decimal(soulEggs[:-1]) 
-        soulEggs = soulEggs * 1000000000000
-    elif soulEggs.endswith('q'):
-        soulEggs = Decimal(soulEggs[:-1]) 
-        soulEggs = soulEggs * 1000000000000000
-    elif soulEggs.endswith('Q'):
-        soulEggs = Decimal(soulEggs[:-1]) 
-        soulEggs = soulEggs * 1000000000000000000
-    elif soulEggs.endswith('s'):
-        soulEggs = Decimal(soulEggs[:-1]) 
-        soulEggs = soulEggs * 1000000000000000000000
-    elif soulEggs.endswith('S'):
-        soulEggs = Decimal(soulEggs[:-1]) 
-        soulEggs = soulEggs * 1000000000000000000000000  
-    elif soulEggs.endswith('o'):
-        soulEggs = Decimal(soulEggs[:-1]) 
-        soulEggs = soulEggs * 1000000000000000000000000000
-    elif soulEggs.endswith('N'):
-        soulEggs = Decimal(soulEggs[:-1]) 
-        soulEggs = soulEggs * 1000000000000000000000000000000
+    if largeNumber.endswith("k"):
+        largeNumber = (largeNumber[:-1]) 
+        largeNumber = largeNumber * 1000    
+    elif largeNumber.endswith("m"):
+        largeNumber = Decimal(largeNumber[:-1]) 
+        largeNumber = largeNumber * 1000000
+    elif largeNumber.endswith("b"):
+        largeNumber = Decimal(largeNumber[:-1]) 
+        largeNumber = largeNumber * 1000000000
+    elif largeNumber.endswith('t'):
+        largeNumber = Decimal(largeNumber[:-1]) 
+        largeNumber = largeNumber * 1000000000000
+    elif largeNumber.endswith('q'):
+        largeNumber = Decimal(largeNumber[:-1]) 
+        largeNumber = largeNumber * 1000000000000000
+    elif largeNumber.endswith('Q'):
+        largeNumber = Decimal(largeNumber[:-1]) 
+        largeNumber = largeNumber * 1000000000000000000
+    elif largeNumber.endswith('s'):
+        largeNumber = Decimal(largeNumber[:-1]) 
+        largeNumber = largeNumber * 1000000000000000000000
+    elif largeNumber.endswith('S'):
+        largeNumber = Decimal(largeNumber[:-1]) 
+        largeNumber = largeNumber * 1000000000000000000000000  
+    elif largeNumber.endswith('o'):
+        largeNumber = Decimal(largeNumber[:-1]) 
+        largeNumber = largeNumber * 1000000000000000000000000000
+    elif largeNumber.endswith('N'):
+        largeNumber = Decimal(largeNumber[:-1]) 
+        largeNumber = largeNumber * 1000000000000000000000000000000
     else:
-        soulEggs = Decimal(soulEggs)
+        largeNumber = Decimal(largeNumber)
+    return largeNumber
+
+
+def calculateEB(soulEggs: str, prophecyEggs: Decimal, prophecyBonus: Decimal, soulFood: Decimal, human: bool):
+    soulEggs = formatLargeNumber(soulEggs)
     try:
         prophecyEggBonus = (1 + 0.05 + (0.01 * prophecyBonus))**prophecyEggs * (10 + soulFood)
         EB = Decimal(prophecyEggBonus) * soulEggs
         if human == True:
             EB = human_format(EB)
+        else: 
+            EB = "{:,}".format(EB)
         return EB
     except:
         return False
