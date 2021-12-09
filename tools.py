@@ -1,28 +1,29 @@
 # Imports
-import json
+import json, yaml
 from math import floor, log
 from decimal import Decimal
 
 def load(which):
-    """Load Stuff"""
-    with open("bot.json") as botJson:
-        bot = json.load(botJson)
+    """Load Configuration Information"""
+    with open("bot.yaml", "r") as botConfig:
+        bot = yaml.safe_load(botConfig)
         return(bot[which])
+        
+# Define a couple 'global' things to use throughout the bot.
+botPrefix = load("botPrefix")
+botName = load("botName")
 
+def is_prime(n):
+    return n > 1 and all(n % i for i in range(2, int(n ** 0.5) + 1))
 
-
-# Format a users ID into a normal string to be used when saving data
-def getid(rawid):
-    """Format Discord User Id into something eaiser to work with"""
-    rawid = rawid.replace("<", "")
-    rawid = rawid.replace(">", "")
-    rawid = rawid.replace("@", "")
-    rawid = rawid.replace("!", "")
-    rawid = int(rawid)
-    return rawid
-    
+"""
+#############
+Begin Merits
+#############
+"""
 
 def loadMerits(userid):
+    """Load a users merits"""
     userid = str(userid)
     with open ("merits.json", "r+") as meritJson:
         data = json.load(meritJson)
@@ -59,15 +60,36 @@ def addMerits(userid, message):
             json.dump(data, meritJson, indent = 2)
             meritJson.truncate()
 
-
-def is_prime(n):
-    return n > 1 and all(n % i for i in range(2, int(n ** 0.5) + 1))
-
+def removeMerit(userid, meritNumber):
+    """Remove a merit from a user."""
+    userid = str(userid)
+    meritNumber -= 1
+    with open("merits.json", "r+") as meritJson:
+        data = json.load(meritJson)
+        if userid in data:
+            currentMerits = data[userid]
+            try:
+                currentMerits.pop(meritNumber)
+            except IndexError:
+                return 1
+            data[userid] = currentMerits
+            meritJson.seek(0)
+            json.dump(data, meritJson, indent = 2)
+            meritJson.truncate()
+            return 3
+        else: 
+            return 2
 
 """
-####################################################
-From here down all functions are needed in egg.py
-####################################################
+#############
+End Merits
+#############
+"""
+
+"""
+###########
+Begin Egg
+###########
 """
 
 def EggFindUser(userid):
@@ -102,8 +124,6 @@ def EggFindUser(userid):
             usersJson.truncate()
             return data[userid]
             
-
-
 
 def UpdateEggUser(userId, displayName, eb, letter, soulEggs, prophecyEggs):
     userId = str(userId)
@@ -250,14 +270,8 @@ def calculateEB(soulEggs: str, prophecyEggs: Decimal, prophecyBonus: Decimal, so
     except:
         return False
 
-
-
-
-
-
-
-
-botPrefix = load("botPrefix")
-botName = load("botName")
-
-
+"""
+###########
+End Egg
+###########
+"""
