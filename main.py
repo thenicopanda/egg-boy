@@ -14,6 +14,7 @@ bot = commands.Bot(command_prefix=t.botPrefix,
 if __name__ == '__main__':
     bot.remove_command('help')
     for x in extensions:
+        x = f"cogs.{x}"
         bot.load_extension(x)
 
 @bot.event
