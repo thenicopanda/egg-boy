@@ -1,8 +1,9 @@
 # egg-boy
 
 ## Requirements
-This Discord bot relys on PyCord. The official PyCord repository can be found [here](https://github.com/Pycord-Development/pycord):
-Everything else should already be a part of Python's modules.
+This discord bot uses PyCord and pyyaml, both can be installed through pip with the following commands:<br />
+`pip install pyyaml`<br />
+`pip install -U git+https://github.com/Pycord-Development/pycord`
 
 
 ## Issues/Commits
