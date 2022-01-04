@@ -1,8 +1,10 @@
 """
 ############################################################################################
  Commands
- * ecalc    - Calculate a hypothetical EB based on input.
- * update   - Update a user's stats in the users.json file (Update Perm Required)
+ * search     - Pull a little bit of potentially useful information from a users backup
+ * ecalc      - Calculate a hypothetical EB based on input.
+ * update     - Force the leaderboard to update right away.
+ * addaccount - Add an EID to your account.
 ############################################################################################
 """
 
@@ -11,12 +13,41 @@ import discord
 from discord.ext import commands
 import tools as t
 from discord.commands import Option, permissions
+from decimal import Decimal
+import ei as e
 
 
 class Egg(commands.Cog, name="Egg Server Functions"):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.slash_command(name="search", guild_ids=[901328556603367446])
+    async def search(self, ctx, eid: Option(str, "EID of person to search.")):
+        searchChannel = self.bot.get_channel(927716139302268968)
+        if searchChannel == ctx.channel:
+            #try:
+                if eid == "EI5450109629759488":
+                    return
+                search = e.firstContactRequest(eid)
+                username = search['backup']['userName']
+                tier1info = f"```{eid} | {username}```"
+
+                boostsUsed = search["backup"]['stats']['boostsUsed']
+                goldenEggsSpent = search['backup']['game']['goldenEggsSpent']
+                goldenEggsEarned = search['backup']['game']['goldenEggsEarned']
+                timeCheats = search['backup']['game']['totalTimeCheatsDetected']
+
+                tier2info = f"```# of Boosts Used: {boostsUsed}\nGolden Eggs Spent: {goldenEggsSpent}\nGolden Eggs Earned: {goldenEggsEarned}\nTime Cheats Detected: {timeCheats}```"
+                boostInfo = "```BOOST INFO\n"
+                boostList = search["backup"]["game"]["boosts"]
+                for boost in boostList:
+                    boostInfo += f"{boost['boostId']}: {boost['count']}\n"
+                responseMessage = tier1info + tier2info + boostInfo + "```"
+                await ctx.respond(responseMessage)
+            #except:
+            #    await ctx.respond("Something went wrong, double check EID entered")
+        else:
+            await ctx.respond("That command may not be used in this channel.")
 
     @commands.slash_command(name='ecalc', guild_ids=[901328556603367446])
     async def ecalc(self,
@@ -28,6 +59,7 @@ class Egg(commands.Cog, name="Egg Server Functions"):
                     humanreadable: Option(bool, "True for preformatted, False for exact numbers", required = False, default = True, options = [True, False])
                     ):
         """Calculate EB based on values you enter."""
+        souleggs = t.formatLargeNumber(souleggs)
         results = t.calculateEB(souleggs, prophecyeggs, prophecybonus, soulfood, humanreadable)
         if results == False:
             await ctx.respond(f"Something went wrong when calculating...```Soul Eggs: {souleggs}\nProphecy Eggs: {prophecyeggs}\nProphecy Bonus: {prophecybonus}\nSoul Food: {soulfood}```")
@@ -37,24 +69,21 @@ class Egg(commands.Cog, name="Egg Server Functions"):
             messageToSend = f"Results:```Soul Eggs: {souleggs}\nProphecy Eggs: {prophecyeggs}\nProphecy Bonus: {prophecybonus}\nSoul Food: {soulfood}\n\nEarnings Bonus: {results}%```"
             await ctx.respond(messageToSend)
 
+    @commands.slash_command(name='addaccount', guild_ids=[901328556603367446])
+    async def addAccount(self, ctx, eid: Option(str, "What is your EID")):
+        result = t.addAccount(eid, ctx.author.display_name, ctx.author.id)
+        if result == True:
+            await ctx.respond("Added account.")
+        else:
+            await ctx.respond("Something went wrong.")
 
     # Update a user's egg data
     @commands.slash_command(name='update', guild_ids=[901328556603367446], default_permission=False)
     @permissions.has_role(902679876065181708) # 902679876065181708 Is Update Perms
     async def update(self, 
-                     ctx, 
-                     person: Option(discord.User, "@ of the user you'd like to update" ), 
-                     eb: Option(float, "Their EB (ex: 123.456)"), 
-                     letter: Option(str, "The letter their EB ends with", choices=["none", "k", "m", "b", "t", "q", "Q", "s", "S", "o", "N", "d"]) 
-                     ):
-        """Update a users information."""
-        t.UpdateEggUser(person.id, person.display_name, eb, letter, 0, 0) # Push the users new stats into the JSON file
-        returnChannel = self.bot.get_channel(902674849082773544) # Grab the #update-output channel
-        embed=discord.Embed(title="New Stats") # Create the Embed + Add a title to it
-        embed.set_author(name=person.display_name, icon_url=person.avatar.url) # Set the author of the embed as the person who got updated
-        embed.add_field(name="Earnings Bonus %", value=str(eb) + letter, inline=False) # Add the EB field
-        await returnChannel.send(embed=embed) # Send embed in #update-output
-            
+                     ctx):
+        """Update the leaderboard"""
+        await ctx.respond("Working...", ephemeral=True)
         leaderboardChannel = self.bot.get_channel(901710731848867900) # Get the #leaderboard channel
         sortedLeaderboard = t.updateLeaderboard() # Collect the current leaderboard stats
         countingNumber = 0 # Counting number for place values on leaderboard
@@ -62,22 +91,17 @@ class Egg(commands.Cog, name="Egg Server Functions"):
         initialLeaderboardEmbed = discord.Embed(title = "Leaderboard", color=0xb3e4f4) # Create the leaderboard embed
         await leaderboardChannel.purge(limit=100) # Clear out any messages currently in #leaderboard
         for x in sortedLeaderboard: # For each group (N,o,S,s,Q,q,t,b,m,other) in the leaderboard
-            for y in x: # For user in group
-                countingNumber += 1 # Add one to the Counting Number
-                embedLimitCounter += 1 # Add one to the Embed Limit Number
-                if embedLimitCounter == 25: # If there are 25 fields on the embed already
-                    await leaderboardChannel.send(embed=initialLeaderboardEmbed) # Send the first embed
-                    embedLimitCounter = 0 # Reset the embed limit
-                    initialLeaderboardEmbed = discord.Embed(color=0xb3e4f4) # Create a new leaderboard embed
-                data = y[1] # Open the user like a fish
-                eb = data["eb"] # Collect EB
-                letter = data["letter"] # Collect Letter
-                eb = str(eb) + letter # Combine letter and EB
-                nickname = data['nickname'] # Collect Nickname
-                embedTitle = "{}. {}".format(countingNumber, nickname) # Set the title of the embed field
-                initialLeaderboardEmbed.add_field(name=embedTitle, value=eb, inline=False) # add the field to the embed
+            countingNumber += 1 # Add one to the Counting Number
+            embedLimitCounter += 1 # Add one to the Embed Limit Number
+            if embedLimitCounter == 25: # If there are 25 fields on the embed already
+                await leaderboardChannel.send(embed=initialLeaderboardEmbed) # Send the first embed
+                embedLimitCounter = 0 # Reset the embed limit
+                initialLeaderboardEmbed = discord.Embed(color=0xb3e4f4) # Create a new leaderboard embed
+
+            eb = t.human_format(Decimal(x["eb"]))
+            embedTitle = "{}. {}".format(countingNumber, x["nickname"]) # Set the title of the embed field
+            initialLeaderboardEmbed.add_field(name=embedTitle, value=eb, inline=False) # add the field to the embed
         await leaderboardChannel.send(embed=initialLeaderboardEmbed) # send any leftover embeds
-        await ctx.respond("Thank you!", ephemeral=True)
    
 def setup(bot):
     bot.add_cog(Egg(bot))
