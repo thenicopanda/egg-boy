@@ -26,8 +26,6 @@ class Egg(commands.Cog, name="Egg Server Functions"):
         searchChannel = self.bot.get_channel(927716139302268968)
         if searchChannel == ctx.channel:
             #try:
-                if eid == "EI5450109629759488":
-                    return
                 search = e.firstContactRequest(eid)
                 username = search['backup']['userName']
                 tier1info = f"```{eid} | {username}```"
