@@ -4,6 +4,9 @@
  * addmerit - Add a merit to a user of your choice
  * merits - get a list of your merits
  * remmerit = Remove a person's merit if needed (Mod Role Required)
+
+ User Command
+ * Merits - same as /merits
 ####################################################
 """
 
@@ -79,5 +82,24 @@ class Merits(commands.Cog, name="Merits"):
         else: 
             await ctx.respond("Something went wrong...", ephemeral = True)
 
+
+    @commands.user_command(name="Merits",
+                            guild_ids=[901328556603367446])
+    async def merits(self, ctx,
+                     who: discord.Member
+                     ):
+        """Get a list of your merits."""
+        userid = who.id
+        meritString = f"Current list of Merits for {who.display_name}:"
+        merits = t.loadMerits(userid)
+        if merits != False:
+            meritNumber = 1
+            for merit in merits:
+                meritString += f"\n{meritNumber}. `{merit}`"
+                meritNumber += 1
+            await ctx.respond(meritString)
+        else:
+            await ctx.respond("You do not have any merits quite yet.")
+        
 def setup(bot):
     bot.add_cog(Merits(bot))
