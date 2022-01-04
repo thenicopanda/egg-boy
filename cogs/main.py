@@ -1,9 +1,10 @@
 """
 ####################################################
  Commands
- * info  - Give some basic info about the bot
- * ping  - Give basic information about the bot
- * cleardms - clear the bots dms to you
+ * info     - Give some basic info about the bot.
+ * ping     - Give basic information about the bot.
+ * cleardms - Clear the bots dms to you.
+ * whois    - Get some basic information on a discord user.
 ####################################################
 """
 
@@ -11,6 +12,7 @@
 import discord
 from discord.ext import commands
 import tools as t
+from discord.commands import Option
 
 # Set the moderator role
 modrole = t.load('modRole')
@@ -49,6 +51,22 @@ class Main(commands.Cog, name="Core Functions"):
             if message.author == self.bot.user:
                 await message.delete()
         await ctx.respond("Done.", ephemeral=True)
+    
+    @commands.slash_command(name="whois", guild_ids=[901328556603367446])
+    async def whois(self, ctx,
+                    persontostalk: Option(str, "The ID number of the person you'd like to stalk.")):
+        """Stalk a person."""
+        user = await self.bot.fetch_user(persontostalk)
+        embed=discord.Embed(title=user.name)
+        embed.set_author(name="Information: ")
+        embed.set_thumbnail(url=user.avatar.url)
+        creationTime = user.created_at
+        creationTime = creationTime.strftime("%m/%d/%Y, %H:%M")
+        embed.add_field(name="Created:", value=creationTime, inline=False)
+        embed.add_field(name="System:", value=user.system, inline=False)
+        embed.add_field(name="Bot:", value=user.bot, inline=False)
+        await ctx.respond(embed=embed)
+
 
 def setup(bot):
     bot.add_cog(Main(bot))
