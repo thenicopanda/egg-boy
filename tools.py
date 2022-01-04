@@ -2,6 +2,7 @@
 import json, yaml
 from math import floor, log
 from decimal import Decimal
+from ei import *
 
 def load(which):
     """Load Configuration Information"""
@@ -9,6 +10,11 @@ def load(which):
         bot = yaml.safe_load(botConfig)
         return(bot[which])
         
+def triviaLoad():
+    """Load the trivia from trivia.json"""
+    with open("trivia.json", "r") as triviaJSON:
+        trivia = json.load(triviaJSON)
+        return trivia
 # Define a couple 'global' things to use throughout the bot.
 botPrefix = load("botPrefix")
 botName = load("botName")
@@ -92,135 +98,42 @@ Begin Egg
 ###########
 """
 
-def EggFindUser(userid):
-    """Load A User From The users.json file"""
-    """Essential in egg.py"""
-    userid = str(userid)
-    #with file open and read/write permissions
-    with open("user.json", 'r+') as usersJson:
-        #save JSON file as a variable
-        data = json.load( usersJson )
-        # if the user already exists
-        if (userid) in data:
-            #return the users information
-            return data[userid]
-        #if the user is not already in the file
-        else:
-            #default information
-            newUserDefaultInfo = {
-                "nickname"     : "",
-                "eb"           : "",
-                "letter"       : "",
-                "soulEggs"     : "",
-                "prophecyEggs" : ""
-            }
-            #create the user in the dictionary
-            data[userid] = newUserDefaultInfo
-            #go to the beginning of the file
-            usersJson.seek(0)
-            #update the JSON file
-            json.dump(data, usersJson, indent =2)
-            #return user info
-            usersJson.truncate()
-            return data[userid]
-            
-
-def UpdateEggUser(userId, displayName, eb, letter, soulEggs, prophecyEggs):
-    userId = str(userId)
-    with open("user.json", 'r+') as userJson:
-        data = json.load (userJson)
-        userCurrentInformation = EggFindUser(userId)
-        newUserInformation = {
-            "nickname"     : displayName,
-            "eb"           : eb,
-            "letter"       : letter,
-            "soulEggs"     : soulEggs,
-            "prophecyEggs" : prophecyEggs
-        }
-        data[userId] = newUserInformation
-        userJson.seek(0)
-        json.dump(data, userJson, indent=2)
-        userJson.truncate()
-        return data[userId]
-
-
-# Function to sort the leaderboard
-def sortFunc(tup):
-    """Function to sort items in the updateLeaderboard() function"""
-    key, d = tup
-    return d['eb']
-
-
-# Function to sort the leaderboard and send it back to caller
 def updateLeaderboard():
+    updateAllUsers()
     with open ("user.json", 'r+') as usersJson:
-        n = 0
-        # Define the Dictionaries to be used for each letter
-        dList = {}
-        nList = {}
-        oList = {}
-        SList = {}
-        sList = {}
-        QList = {}
-        qList = {}
-        tList = {}
-        bList = {}
-        mList = {}
-        kList = {}
-        extraList = {}
-
-        data = json.load(usersJson)
+        data = json.load(usersJson) # Load the data
+        n = 0 # declare the number
+        peopleList = []
         for user in data.values():
             n += 1
-            eb = user["eb"]
+            eb = calculateEB(user["soulEggs"], user["prophecyEggs"], user["prophecyBonus"], user["soulFood"], False)
             username = user["nickname"]
-            letter = user["letter"]
             sampleDict = {
-                "eb" : eb,
-                "letter" : letter,
+                "eb" : str(eb),
                 "nickname" : username
             }
-            if letter == "d":
-                dList[n] = sampleDict
-            elif letter == "N":
-                nList[n] = sampleDict 
-            elif letter == "o":
-                oList[n] = sampleDict
-            elif letter == "S":
-                SList[n] = sampleDict
-            elif letter == "s":
-                sList[n] = sampleDict
-            elif letter == "Q":
-                QList[n] = sampleDict
-            elif letter == "q":
-                qList[n] = sampleDict
-            elif letter == "t":
-                tList[n] = sampleDict
-            elif letter == "b":
-                bList[n] = sampleDict
-            elif letter == "m":
-                mList[n] = sampleDict
-            elif letter == "k":
-                kList[n] = sampleDict
-            else:
-                extraList[n] = sampleDict
-        dList = sorted(dList.items(), key = sortFunc, reverse=True)
-        nList = sorted(nList.items(), key = sortFunc, reverse=True)
-        oList = sorted(oList.items(), key = sortFunc, reverse=True)
-        SList = sorted(SList.items(), key = sortFunc, reverse=True)
-        sList = sorted(sList.items(), key = sortFunc, reverse=True)
-        QList = sorted(QList.items(), key = sortFunc, reverse=True)
-        qList = sorted(qList.items(), key = sortFunc, reverse=True)
-        tList = sorted(tList.items(), key = sortFunc, reverse=True)
-        bList = sorted(bList.items(), key = sortFunc, reverse=True)
-        mList = sorted(mList.items(), key = sortFunc, reverse=True)
-        kList = sorted(kList.items(), key = sortFunc, reverse=True)
-        extraList = sorted(extraList.items(), key = sortFunc, reverse=True)
-        returnList = [dList, nList, oList, SList, sList, QList, qList, tList, bList, mList, kList, extraList]
-        return returnList
+            peopleList.append(sampleDict)
 
+        peopleList = sorted(peopleList, key = lambda i: Decimal(i['eb']), reverse=True)
 
-def human_format(number):
+        return peopleList
+def addAccount(eid, nickname, discordId):
+    with open("user.json", "r+") as usersJson:
+        try:
+            data = json.load(usersJson)
+            backup = firstContactRequest(eid)
+            info = getEB(backup)
+            newPerson = info 
+            newPerson["nickname"] = nickname
+            data[discordId] = newPerson
+            usersJson.seek(0)
+            json.dump(data, usersJson, indent=2)
+            usersJson.truncate()
+            return True
+        except:
+            return False
+
+def human_format(number: Decimal):
     units = ['', 'k', 'm', 'b', 'T', 'q', 'Q', 's', 'S', 'o', 'N', 'd', 'U', 'D', 'Td', 'qd', 'Qd', 'sd', 'Sd', 'Od', 'Nd', 'V', 'uV', 'dV', 'tV', 'qV', 'sV', 'SV', 'OV', 'NV', 'tT']
     k = Decimal(1000.0)
     magnitude = int(floor(log(number, k)))
@@ -265,15 +178,12 @@ def formatLargeNumber(largeNumber: str):
     return largeNumber
 
 
-def calculateEB(soulEggs: str, prophecyEggs: Decimal, prophecyBonus: Decimal, soulFood: Decimal, human: bool):
-    soulEggs = formatLargeNumber(soulEggs)
+def calculateEB(soulEggs: Decimal, prophecyEggs: Decimal, prophecyBonus: Decimal, soulFood: Decimal, human: bool):
     try:
-        prophecyEggBonus = (1 + 0.05 + (0.01 * prophecyBonus))**prophecyEggs * (10 + soulFood)
-        EB = Decimal(prophecyEggBonus) * soulEggs
+        prophecyEggBonus = (Decimal(1) + Decimal(0.05) + (Decimal(0.01) * Decimal(prophecyBonus)))**Decimal(prophecyEggs) * (Decimal(10) + Decimal(soulFood))
+        EB = Decimal(prophecyEggBonus) * Decimal(soulEggs)
         if human == True:
             EB = human_format(EB)
-        else: 
-            EB = "{:,}".format(EB)
         return EB
     except:
         return False
