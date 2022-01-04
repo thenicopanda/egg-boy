@@ -4,6 +4,10 @@ Commands
  * purge - Purge up to 100 messages at a time                        (Mod Role Required)
  * say   - Makes the bot say something in a channel of your choosing (Mod Role Required)
  * pchannel - Create a private channel for up to 5 users             (Mod Role Required)
+ * senddm - Reply to a dm sent to the bot                            (Mod Role Required)
+
+Listener
+ * modmail - Take any DM sent to the bot and relay it to a channel.
 ############################################################################################
 """
 
@@ -90,5 +94,40 @@ class Mod(commands.Cog, name="Moderation Commands"):
             modLogChannel = self.bot.get_channel(t.load("modLogChannel"))
             logEmbed = discord.Embed().set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar.url).add_field(name="Private Channel", value= f"Private Channel {newChannel.mention} created.", inline=False)
             await modLogChannel.send(embed=logEmbed)
+
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if t.load("modMailChannel"):
+            channel = self.bot.get_channel(t.load("modMailChannel"))
+            if message.guild is None and message.author != self.bot.user:
+                embed=discord.Embed(title="New Message") # Create the Embed + Add a title to it
+                embed.set_author(name=message.author.display_name, icon_url=message.author.avatar.url) # Set the author of the embed as the person who got updated
+                embed.add_field(name="Message", value=message.content, inline=False) # Add the EB field
+            
+                await channel.send(embed=embed)
+                await channel.send(f"Author ID: {message.author.id}\nMessage ID: {message.id}")
+
+    @commands.slash_command(name='senddm', 
+                            guild_ids=[901328556603367446], 
+                            default_permission=False
+                            )
+    @permissions.has_role(modrole)
+    async def senddm(self, 
+                  ctx, 
+                  person: Option(discord.User, "User ID of the person to DM." ), 
+                  messageid: Option(str, "Message ID to respond to."),
+                  message: Option(str, "Message to send.")
+                  ):
+        """Makes the bot send a DM to a person."""
+        dmChannel = await self.bot.create_dm(person)
+        msg = await dmChannel.fetch_message(int(messageid))
+        await msg.reply(message)
+        embed = discord.Embed(title="Response")
+        embed.add_field(name="Original Message:", value=msg.content, inline=False)
+        embed.add_field(name="Original Message Author:", value = f"{person.mention}", inline=False)
+        embed.add_field(name="Response:", value = message, inline=False)
+        await ctx.respond(embed=embed)
+
 def setup(bot):
     bot.add_cog(Mod(bot))
