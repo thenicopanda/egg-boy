@@ -9,11 +9,24 @@ botName: Egg Boy
 # This is the role ID for whoever is supposed to have moderation perms
 modRole: 903020754898137108
 
+# This is the role ID for whoever should have Admin perms
+adminRole: 901337091512885248
+
 # This is the super secret token to actually run the bot.
-token: token goes here
+token: 
 
 # This is what the bot will be shown as playing.
-displayGame: Cracking Piggys
+displayGame:
+- Cracking Piggys
+- Interrogating the Drones
+- Selling Eggs
+- Breaking Bones
+- Making Omeletes
+- Dampening Wormholes
+- Filling Silos
+- Calming Hatcherys
+- Purchasing Hyperloops
+- Layering Multiverses
 
 #################################################################################
 
@@ -29,6 +42,12 @@ countingChannel: 916189263756943390
 
 # Category for private channels to be put under
 privateChannelCategory: 903482862811111454
+
+# Channel for DMs sent to bot to go to
+modMailChannel: 921662709672607795
+
+# Trivia Channel
+triviaChannel: 919085902846902312
 
 ##################################################################################
 
