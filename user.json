@@ -1,8 +1,9 @@
 {
-  "Discord User ID": {
-    "nickname": "",
-    "eb": 1.111,
-    "letter": "m",
-    "soulEggs": 0,
-    "prophecyEggs": 0
-}
+  "discord user id": {
+    "eid": "egg, inc user id",
+    "soulFood": "soul food level,
+    "prophecyBonus": "prophecy bonus level",
+    "soulEggs": "soul egg total",
+    "prophecyEggs": "prophecy eggs",
+    "nickname": "discord nickname"
+  }
