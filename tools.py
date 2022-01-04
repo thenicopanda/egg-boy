@@ -97,6 +97,42 @@ End Merits
 Begin Egg
 ###########
 """
+def updateAllUsers():
+    with open("user.json", "r+") as usersJson:
+        data = json.load(usersJson)
+        for userId, person in data.items():
+            backup = firstContactRequest(person["eid"])
+            personInfo = getEB(backup)
+            personInfo["nickname"] = person["nickname"]
+            data[userId] = personInfo
+
+        usersJson.seek(0)
+        json.dump(data, usersJson, indent=2)
+        usersJson.truncate()
+
+        
+def getEB(backup):
+    """Pull all relavent EB data from backup"""
+    backup = backup["backup"]
+    researchList = backup["game"]["epicResearch"]
+    soulFood = 0
+    prophecyBonus = 0
+    for research in researchList:
+        if research["id"] == "soul_eggs":
+            soulFood = research["level"]
+        if research["id"] == "prophecy_bonus":
+            prophecyBonus = research["level"]
+    prophecyEggs = backup["game"]["eggsOfProphecy"]
+    soulEggs = backup["game"]["soulEggsD"]
+    
+    returndict = {
+        "eid" : backup['eiUserId'],
+        "soulFood" : soulFood,
+        "prophecyBonus" : prophecyBonus,
+        "soulEggs" : soulEggs,
+        "prophecyEggs" : prophecyEggs
+    }
+    return returndict
 
 def updateLeaderboard():
     updateAllUsers()
@@ -117,6 +153,8 @@ def updateLeaderboard():
         peopleList = sorted(peopleList, key = lambda i: Decimal(i['eb']), reverse=True)
 
         return peopleList
+
+
 def addAccount(eid, nickname, discordId):
     with open("user.json", "r+") as usersJson:
         try:
