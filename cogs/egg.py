@@ -8,9 +8,11 @@
 ############################################################################################
 """
 
+
 # Imports
 import discord
 from discord.ext import commands
+from discord.ext.commands.core import guild_only
 import tools as t
 from discord.commands import Option, permissions
 from decimal import Decimal
@@ -69,13 +71,39 @@ class Egg(commands.Cog, name="Egg Server Functions"):
 
     @commands.slash_command(name='addaccount', guild_ids=[901328556603367446])
     async def addAccount(self, ctx, eid: Option(str, "What is your EID")):
+        """Add an Egg, Inc. account."""
+        msg = await ctx.send("Working...")
         result = t.addAccount(eid, ctx.author.display_name, ctx.author.id)
         if result == True:
-            await ctx.respond("Added account.")
+            await msg.edit(f"Account added. {ctx.author.mention}")
         else:
-            await ctx.respond("Something went wrong.")
+            await msg.edit(f"Something went wrong. {ctx.author.mention}")
 
-    # Update a user's egg data
+    @commands.slash_command(name="deleteaccount", guild_ids=[901328556603367446])
+    async def deleteaccount(self, ctx, eid: Option(str, "Egg, Inc. account to delete")):
+        results = t.deleteAccount(eid, ctx.author.id)
+        if results == True:
+            await ctx.respond("Account deleted successfully")
+        else:
+            await ctx.respond("You either do not have permission to delete this account or it does not exist. Please double check the EID used.")
+
+    @commands.slash_command(name='userstatus', guild_ids=[901328556603367446])
+    async def userstatus(self, ctx):
+        """Check what accounts are linked to you."""
+        results = t.searchByDiscordID(ctx.author.id)
+        baseMsg = f"Accounts for {ctx.author.mention}:\n"
+        msg = ""
+        for eid, contents in results.items():
+            eb = t.calculateEB(contents["soulEggs"], contents["prophecyEggs"], contents["prophecyBonus"], contents["soulFood"], True)
+            msg += f"> {eid} - {eb}\n"
+        if msg == "":
+            await ctx.respond(f"No accounts found for {ctx.author.mention}")
+        else:
+            await ctx.respond(f"{baseMsg} {msg}")
+
+
+
+
     @commands.slash_command(name='update', guild_ids=[901328556603367446], default_permission=False)
     @permissions.has_role(902679876065181708) # 902679876065181708 Is Update Perms
     async def update(self, 
