@@ -1,6 +1,8 @@
 
 # egg-boy
 If you are going to use this bot, please make sure to leave credit to me in the `/info`, I've put a decent amount of time into making this bot and getting the API aspect of it to work properly. 
+
+This bot is ran in a way that uses 2 bots, one for commands, and one for the leaderboards. Include both tokens in `bot.yaml` and then make sure to run `main.py` and `main2.py` to ensure everything works correctly.
 ## Api
 This repository contains code for accessing the 'API' of the game Egg, Inc. Files of note are `ei.py, ei_pb2.py, tools.py, as well as ei.proto`. Between these 4 files you should be able to figure out how to use the API to make any calls you may need. All that I'm showing you how to do is a basic request to get somebody's backup.
 ## Requirements
@@ -13,4 +15,4 @@ If you see an issue that you know how to fix, feel free to make a pull request a
 <br /><br />
 I am well aware that parts of this bot do not follow 'best practices'. I do not need you telling me this unless you intend to show me what would be better.
 ## Contact
-Feel free to message me on discord. `uwu?#0712`
+If you have an issue with this bot feel free to leave an issue on this repository, no promises that I'll actually fix it though.
