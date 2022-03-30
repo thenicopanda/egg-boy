@@ -1,8 +1,9 @@
 # Imports
 import json, yaml
-from math import floor, log
+from math import floor, log, sqrt
 from decimal import *
 from ei import *
+from datetime import datetime
 
 def load(which):
     """Load Configuration Information"""
@@ -21,6 +22,12 @@ botName = load("botName")
 
 def is_prime(n):
     return n > 1 and all(n % i for i in range(2, int(n ** 0.5) + 1)) # IDK how this works, but don't touch it pls
+
+def is_square(n):
+    if sqrt(n).is_integer():
+        return sqrt(n)
+    else:
+        return False
 
 def loadMerits(userid):
     """Load a users merits"""
@@ -212,7 +219,7 @@ def searchByDiscordID(discordID):
         return results
 
 def updateLeaderboard():
-    updateAllUsers()
+    #updateAllUsers()
     with open ("user.json", 'r+') as usersJson:
         data = json.load(usersJson) # Load the data
         n = 0 # declare the number
@@ -233,6 +240,23 @@ def updateLeaderboard():
 
         return peopleList
 
+def updateSoulLeaderboard():
+    with open ("user.json", 'r+') as usersJson:
+        data = json.load(usersJson) # Load the data
+        n = 0 # declare the number
+        peopleList = []
+        for user in data.values():
+            n += 1
+            sampleDict = {
+                "soulEggs" : str(user["soulEggs"]),
+                "discord" : user['discord']
+            }
+            peopleList.append(sampleDict)
+
+        peopleList = sorted(peopleList, key = lambda i: Decimal(i['soulEggs']), reverse=True)
+
+        return peopleList
+
 def updateAllUsers():
     with open("user.json", "r+") as usersJson:
         data = json.load(usersJson)
@@ -244,7 +268,7 @@ def updateAllUsers():
                 personInfo["discord"] = person["discord"]
                 data[eid] = personInfo
             except:
-                print(f"{eid} failed to update")
+                print(f"{eid} failed to update at {datetime.now()}")
 
         usersJson.seek(0)
         json.dump(data, usersJson, indent=2)
@@ -252,8 +276,8 @@ def updateAllUsers():
 
 
 def getOom(eb: Decimal):
-    units = ['Farmer','Farmer','Farmer', # 3
-             'Farmer', 'Farmer II', 'Farmer III', # 6
+    units = ['Farmer','Farmer','Farmer', # 0-2
+             'Farmer', 'Farmer II', 'Farmer III', # 3-7
              'Kilofarmer', 'Kilofarmer II', 'Kilofarmer III', # 9
              'Megafarmer', 'Megafarmer II', 'Megafarmer III', # 12
              'Gigafarmer', 'Gigafarmer II', 'Gigafarmer III', # 15
