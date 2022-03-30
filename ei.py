@@ -55,4 +55,52 @@ def firstContactRequest(ei_user_id):
     # Create and return dictionary with backup
     return MessageToDict(responseObject)
 
-            
+def kickPlayerRequest(ei_user_id_to_kick, contract_id, coop_name):
+    url = "https://www.auxbrain.com/ei/kick_player_coop"
+    kendrome = "EI5223299518300160"
+    kickPlayerRequest = ei.KickPlayerCoopRequest()
+    kickPlayerRequest.rinfo.MergeFrom(basicRequestInfo(kendrome))
+    kickPlayerRequest.player_identifier = ei_user_id_to_kick
+    kickPlayerRequest.contract_identifier = contract_id
+    kickPlayerRequest.coop_identifier = coop_name    
+    kickPlayerRequest.requesting_user_id = kendrome
+    kickPlayerRequest.reason = 4 # Private coop
+
+    # Serialize and encode the payload
+    data = b64encode(kickPlayerRequest.SerializeToString())
+    # Get and save the response
+    resp = requests.post(url, data={'data' : data.decode(), 'user' : kendrome}) 
+
+    
+    # Decode the content
+    response =resp.content.decode() 
+    return response
+
+
+def createCoopRequest(ei_user_id, contract_id, coop_name, eop):
+    url = "https://www.auxbrain.com/ei/create_coop"
+    platform = ei.Platform.Value(device_id)
+    createCoopRequest = ei.CreateCoopRequest()
+    responseObject = ei.CreateCoopResponse()
+    authenticatedMessage = ei.AuthenticatedMessage()
+    createCoopRequest.rinfo.MergeFrom(basicRequestInfo(ei_user_id)) # 10
+    createCoopRequest.contract_identifier = contract_id # 1
+    createCoopRequest.coop_identifier = coop_name # 2
+    createCoopRequest.platform = platform # 6
+    createCoopRequest.league = 0 # 9
+    createCoopRequest.client_version = client_version # 7
+    createCoopRequest.user_id = ei_user_id
+
+    # Serialize and encode the payload
+    data = b64encode(createCoopRequest.SerializeToString())
+    # Get and save the response
+    resp = requests.post(url, data={'data' : data.decode(), 'user' : ei_user_id}) 
+
+
+    # Decode the content
+    response = b64decode( resp.content.decode() )
+
+    responseObject.ParseFromString(response)
+
+    # Create and return dictionary with backup
+    return MessageToDict(responseObject)
