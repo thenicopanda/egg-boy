@@ -12,7 +12,6 @@
 # Imports
 import discord
 from discord.ext import commands
-from discord.ext.commands.core import guild_only
 import tools as t
 from discord.commands import Option, permissions
 from decimal import Decimal
@@ -39,9 +38,12 @@ class Egg(commands.Cog, name="Egg Server Functions"):
 
                 tier2info = f"```# of Boosts Used: {boostsUsed}\nGolden Eggs Spent: {goldenEggsSpent}\nGolden Eggs Earned: {goldenEggsEarned}\nTime Cheats Detected: {timeCheats}```"
                 boostInfo = "```BOOST INFO\n"
-                boostList = search["backup"]["game"]["boosts"]
-                for boost in boostList:
-                    boostInfo += f"{boost['boostId']}: {boost['count']}\n"
+                try:
+                    boostList = search["backup"]["game"]["boosts"]
+                    for boost in boostList:
+                        boostInfo += f"{boost['boostId']}: {boost['count']}\n"
+                except:
+                    boostInfo += "None"
                 responseMessage = tier1info + tier2info + boostInfo + "```"
                 await ctx.respond(responseMessage)
             #except:
@@ -77,6 +79,7 @@ class Egg(commands.Cog, name="Egg Server Functions"):
         if result == True:
             await msg.edit(f"Account added. {ctx.author.mention}")
         else:
+            print(f"EID could not be added: {eid}")
             await msg.edit(f"Something went wrong. {ctx.author.mention}")
 
     @commands.slash_command(name="deleteaccount", guild_ids=[901328556603367446])
@@ -111,6 +114,7 @@ class Egg(commands.Cog, name="Egg Server Functions"):
         """Update the leaderboard"""
         await ctx.respond("Working...", ephemeral=True)
         leaderboardChannel = self.bot.get_channel(901710731848867900) # Get the #leaderboard channel
+        t.updateAllUsers()
         sortedLeaderboard = t.updateLeaderboard() # Collect the current leaderboard stats
         countingNumber = 0 # Counting number for place values on leaderboard
         embedLimitCounter = 0 # Limit counter to avoid accidentlly adding too many fields to the embed
